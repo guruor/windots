@@ -33,22 +33,14 @@ else {
 
 Write-Warning "Starting with config symlinking."
 
-# Fetch submodules
-# git config core.symlinks true
-# git submodule update --init --recursive
-rm dotfiles-open -Force -Recurse
-rm ~/.config/git -Force -Recurse
-# Clones the repo including private config
-git clone --recurse-submodules -c core.symlinks=true https://github.com/guruor/dotfiles-open
-
-function Create-Symlinks {
+function New-Symlinks {
   param (
     [Parameter(Mandatory = $true)]
     [string]$SourceDirectory,
     [Parameter(Mandatory = $true)]
     [string]$DestinationDirectory,
     [Parameter(Mandatory = $false)]
-    [switch]$DryRun = $true
+    [switch]$DryRun = $false
   )
 
   Write-Warning "Symlinking files from '$SourceDirectory' to '$DestinationDirectory'."
@@ -114,7 +106,7 @@ function New-SelectiveSymlinks {
 
   # If no file list provided, call the existing function for all files
   if (-not $FileList) {
-    Create-Symlinks -SourceDirectory $SourceDirectory -DestinationDirectory $DestinationDirectory -DryRun:$DryRun
+    New-Symlinks -SourceDirectory $SourceDirectory -DestinationDirectory $DestinationDirectory -DryRun:$DryRun
     Pop-Location  # Pop back to original location
     return
   }
@@ -131,7 +123,7 @@ function New-SelectiveSymlinks {
     $sourcePath = $itemPath
     $destinationPath = Join-Path -Path $DestinationDirectory -ChildPath $item
 
-    Create-Symlinks -SourceDirectory $sourcePath -DestinationDirectory $destinationPath -DryRun:$DryRun
+    New-Symlinks -SourceDirectory $sourcePath -DestinationDirectory $destinationPath -DryRun:$DryRun
   }
 
   # Pop back to the original location (likely git root)
@@ -153,7 +145,7 @@ New-SelectiveSymlinks -SourceDirectory "$winConfigSourcePath" -DestinationDirect
 New-SelectiveSymlinks -SourceDirectory "$profileConfigSourcePath" -DestinationDirectory "$env:USERPROFILE\Documents"
 
 # Symlink items in dotfiles-open\.config to .config in home directory
-$fileList = @("kanata", "git")
+$fileList = @("kanata", "git", "wezterm")
 New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory "$configDestinationPath" -FileList @($fileList)
 
 # Symlinking kanata-tray config
@@ -167,7 +159,7 @@ New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory
 
 # Symlinking ssh config
 $fileList = @(".ssh")
-rm "$env:USERPROFILE\.ssh" -Force -Recurse
+Remove-Item "$env:USERPROFILE\.ssh" -Force -Recurse
 New-SelectiveSymlinks -SourceDirectory "$privateConfigSourcePath" -DestinationDirectory "$env:USERPROFILE" -FileList @($fileList)
 
 # Startup
