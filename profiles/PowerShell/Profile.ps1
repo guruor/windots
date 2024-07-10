@@ -26,8 +26,8 @@ Import-Module -Name CompletionPredictor
 Import-Module -Name Terminal-Icons
 
 # Windows terminal font
-Import-Module -Name WindowsConsoleFonts
-Set-ConsoleFont JetBrainsMono -Size 18
+# Import-Module -Name WindowsConsoleFonts
+# Set-ConsoleFont JetBrainsMono -Size 18
 
 # Env variables
 $env:YAZI_FILE_ONE = "$Env:Programfiles\Git\usr\bin\file.exe"
@@ -42,8 +42,8 @@ New-Bash-Alias cf "cd ~/.config"
 New-Bash-Alias doti "dot; . ./install"
 New-Bash-Alias q "exit"
 New-Bash-Alias .. "cd ../"
-New-Bash-Alias c "nvim $args"
-New-Bash-Alias g "git $args"
+New-Bash-Alias c "nvim @args"
+New-Bash-Alias g "git @args"
 
 
 # PSReadLine
