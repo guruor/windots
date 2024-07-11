@@ -1,11 +1,16 @@
 $confirmation = Read-Host "Want to install tools, pwsh modules and fonts? (Y/N)"
 
 # Check user's response
-if ($confirmation -eq "Y" -or $confirmation -eq "y") {
+if ($confirmation -eq "Y" -or $confirmation -eq "y")
+{
   # Scoop Packages
   scoop config aria2-warning-enabled false
   scoop bucket add anderlli0053_DEV-tools https://github.com/anderlli0053/DEV-tools
-  scoop install neovim eza fd fzf ripgrep bat less gh git delta make gcc msys2 openssh wget curl nodejs python powershell powertoys winget 7zip gzip komorebi whkd oh-my-posh
+  # Build dev utils
+  scoop install git curl wget make msys2 7zip gzip unzip gcc nodejs python go rustup-msvc luarocks
+  # Handy tools
+  scoop install neovim eza fd fzf ripgrep bat less gh delta openssh powershell powertoys winget komorebi whkd oh-my-posh
+  # Yazi dependencies
   scoop install unar jq yq poppler zoxide yazi
   # This installation has file.exe, which will be used by yazi to display infomation about file
   winget install Git.Git
@@ -26,14 +31,15 @@ if ($confirmation -eq "Y" -or $confirmation -eq "y") {
 
   # Install neovim helper
   pip install neovim
-}
-else {
-    Write-Warning "Skipping Installation."
+} else
+{
+  Write-Warning "Skipping Installation."
 }
 
 Write-Warning "Starting with config symlinking."
 
-function New-Symlinks {
+function New-Symlinks
+{
   param (
     [Parameter(Mandatory = $true)]
     [string]$SourceDirectory,
@@ -46,7 +52,8 @@ function New-Symlinks {
   Write-Warning "Symlinking files from '$SourceDirectory' to '$DestinationDirectory'."
 
   # Ensure source directory exists
-  if (-not (Test-Path $SourceDirectory)) {
+  if (-not (Test-Path $SourceDirectory))
+  {
     Write-Error "Error: Source directory '$SourceDirectory' not found."
     return
   }
@@ -54,12 +61,14 @@ function New-Symlinks {
   # Get all files recursively (using Get-ChildItem with -File and -Recurse)
   $items = Get-ChildItem -Path $SourceDirectory -Recurse -File
 
-  foreach ($item in $items) {
+  foreach ($item in $items)
+  {
     $sourceItem = $item.FullName
     $relativePath = $item.FullName.Substring($SourceDirectory.Length).TrimStart('\')  # Get relative path
-    
+
     # Handle empty relative path
-    if ($relativePath -eq "") {
+    if ($relativePath -eq "")
+    {
       $relativePath = "."
     }
 
@@ -67,7 +76,8 @@ function New-Symlinks {
     $destinationItem = Join-Path -Path $DestinationDirectory -ChildPath $relativePath
 
     #  For DryRun, show intended action
-    if ($DryRun) {
+    if ($DryRun)
+    {
       Write-Output "Would create symbolic link: $destinationItem -> $sourceItem"
       continue
     }
@@ -76,7 +86,8 @@ function New-Symlinks {
 
     # Create parent directories if they don't exist
     $parentDirectory = $destinationItem.Substring(0, $destinationItem.LastIndexOf('\'))
-    if (-not (Test-Path $parentDirectory)) {
+    if (-not (Test-Path $parentDirectory))
+    {
       New-Item -ItemType Directory -Path $parentDirectory -Force | Out-Null
     }
 
@@ -86,7 +97,8 @@ function New-Symlinks {
   }
 }
 
-function New-SelectiveSymlinks {
+function New-SelectiveSymlinks
+{
   param (
     [Parameter(Mandatory = $true)]
     [string]$SourceDirectory,
@@ -105,17 +117,20 @@ function New-SelectiveSymlinks {
   Push-Location $SourceDirectory
 
   # If no file list provided, call the existing function for all files
-  if (-not $FileList) {
+  if (-not $FileList)
+  {
     New-Symlinks -SourceDirectory $SourceDirectory -DestinationDirectory $DestinationDirectory -DryRun:$DryRun
     Pop-Location  # Pop back to original location
     return
   }
 
   # Call the function for each item in the list (relative paths)
-  foreach ($item in $FileList) {
+  foreach ($item in $FileList)
+  {
     $itemPath = Join-Path -Path $SourceDirectory -ChildPath $item  # Resolve relative path
 
-    if (-not (Test-Path $itemPath)) {
+    if (-not (Test-Path $itemPath))
+    {
       Write-Warning "Skipping '$item': Path not found within source directory."
       continue
     }
