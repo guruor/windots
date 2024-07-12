@@ -14,6 +14,7 @@ if ($confirmation -eq "Y" -or $confirmation -eq "y")
   scoop install unar jq yq poppler zoxide yazi
   # This installation has file.exe, which will be used by yazi to display infomation about file
   winget install Git.Git
+  winget install Alacritty.Alacritty
 
   scoop update *
 
@@ -167,7 +168,7 @@ $fileList = @("kanata", "git", "wezterm")
 New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory "$configDestinationPath" -FileList @($fileList)
 
 # Symlinking kanata-tray config
-$fileList = @("kanata-tray", "yazi")
+$fileList = @("kanata-tray", "yazi", "bottom", "alacritty")
 New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory "$env:APPDATA" -FileList @($fileList)
 
 # Symlinking nvim config
