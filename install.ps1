@@ -156,8 +156,11 @@ $configDestinationPath = Join-Path $env:USERPROFILE ".config"
 # Komorebi, wkhd etc
 New-SelectiveSymlinks -SourceDirectory "$winConfigSourcePath" -DestinationDirectory "$configDestinationPath"
 
+
 # PowerShell 7 profiles
 New-SelectiveSymlinks -SourceDirectory "$profileConfigSourcePath" -DestinationDirectory "$env:USERPROFILE\Documents"
+# PowerShell
+New-Item -ItemType SymbolicLink -Target "$profileConfigSourcePath\PowerShell" -Path "$env:USERPROFILE\Documents\WindowsPowerShell"  -Force
 
 # Symlink items in dotfiles-open\.config to .config in home directory
 $fileList = @("kanata", "git", "wezterm")
