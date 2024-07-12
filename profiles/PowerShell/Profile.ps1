@@ -36,12 +36,14 @@ Import-Module -Name Terminal-Icons
 $env:YAZI_FILE_ONE = "$Env:Programfiles\Git\usr\bin\file.exe"
 $env:MYVIMRCLSP = "$env:LOCALAPPDATA/nvim/lua/initlsp.lua"
 $env:EDITOR = "nvim"
+$env:MY_DOTFILES_DIR = "~/windots"
+$env:SHELL = "pwsh"
 
 # Aliases
 Set-Alias vi nvim
 New-Bash-Alias pwsha "start-process pwsh -verb runas"
 New-Bash-Alias cf "cd ~/.config"
-New-Bash-Alias dot "cd ~/windots"
+New-Bash-Alias dot "cd $env:MY_DOTFILES_DIR"
 New-Bash-Alias udot "dot; cd dotfiles-open;"
 New-Bash-Alias pdot "udot; cd Private;"
 New-Bash-Alias doti "dot; . ./install"
