@@ -5,6 +5,7 @@ function StartKanata {
 
 function StopKanata {
     taskkill /f /im kanata-tray.exe
+    taskkill /f /im kanata.exe
 }
 
 function StartTiling {
