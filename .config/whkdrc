@@ -5,16 +5,17 @@
 
 # Reload whkd configuration
 # alt + o                 : taskkill /f /im whkd.exe && start /b whkd # if shell is cmd
-# alt + o                 : taskkill /f /im whkd.exe && Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
 alt + o                 : taskkill /f /im whkd.exe && Start-Process whkd -WindowStyle hidden # if shell is pwsh / powershell
 alt + shift + o         : komorebic reload-configuration
 
 # App shortcuts - these require shell to be pwsh / powershell
 # The apps will be focused if open, or launched if not open
-# alt + f                 : if ($wshell.AppActivate('Firefox') -eq $False) { start firefox }
-# alt + b                 : if ($wshell.AppActivate('Chrome') -eq $False) { start chrome }
-alt + ctrl + shift + return : alacritty --title "New Window" -e "$env:SHELL"
-alt + ctrl + shift + r      : alacritty --title "Bottom" -e "$env:SHELL" -c "btm -b"
+alt + ctrl + shift + return : openterm -title "New Window"
+alt + ctrl + shift + o      : if ($wshell.AppActivate('Yazi') -eq $False) { openterm -title "Yazi" -cmdStr "cd ~; yazi" }
+alt + ctrl + shift + r      : if ($wshell.AppActivate('Bottom') -eq $False) { openterm -title "Bottom" -cmdStr "btm -b" }
+# alt + ctrl + shift + n      : if ($wshell.AppActivate('Notion') -eq $False) { start Notion }
+alt + ctrl + shift + w      : if ($wshell.AppActivate('Brave') -eq $False) { start Brave }
+alt + ctrl + shift + oem_1  : if ($wshell.AppActivate('Code') -eq $False) { openterm -title "Code" -cmdStr "dot;c" } # oem_1 is ;
 
 # Focus windows
 alt + ctrl + shift + q                 : komorebic close
