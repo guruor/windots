@@ -8,21 +8,93 @@
   "default_container_padding": 2,
   "border": true,
   "border_width": 3,
-   "border_colours": {
+  "border_colours": {
     "single": "#42a5f5",
     "stack": "#00a542",
     "monocle": "#ff3399",
     "unfocused": "#808080"
   },
+  "stackbar": {
+    "height": 40,
+    "mode": "OnStack",
+    "tabs": {
+      "width": 300,
+      "focused_text": "#00a542",
+      "unfocused_text": "#b3b3b3",
+      "background": "#141414"
+    }
+  },
   "monitors": [
     {
       "workspaces": [
-        { "name": "I", "layout": "BSP" },
-        { "name": "II", "layout": "BSP" },
-        { "name": "III", "layout": "BSP" },
-        { "name": "IV", "layout": "BSP" },
-        { "name": "V", "layout": "BSP" },
-        { "name": "VI", "layout": "BSP" }
+        {
+          "name": "I",
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Title",
+              "id": "Code"
+            },
+            {
+              "kind": "Exe",
+              "id": "code.exe"
+            }
+          ]
+        },
+        {
+          "name": "II",
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Title",
+              "id": "Servers"
+            }
+          ]
+        },
+        {
+          "name": "III",
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Title",
+              "id": "Postman"
+            },
+            {
+              "kind": "Title",
+              "id": "DB"
+            }
+          ]
+        },
+        {
+          "name": "IV",
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "brave.exe"
+            }
+          ]
+        },
+        {
+          "name": "V",
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "slack.exe"
+            }
+          ]
+        },
+        {
+          "name": "VI",
+          "layout": "BSP",
+          "initial_workspace_rules": [
+            {
+              "kind": "Exe",
+              "id": "spotify.exe"
+            }
+          ]
+        }
       ]
     }
   ]
