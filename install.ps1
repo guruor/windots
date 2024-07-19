@@ -9,12 +9,12 @@ if ($confirmation -eq "Y" -or $confirmation -eq "y")
   # Build dev utils
   scoop install git curl wget make msys2 7zip gzip unzip gcc nodejs python go rustup-msvc luarocks
   # Handy tools
-  scoop install neovim eza fd fzf ripgrep bat less gh delta openssh powershell powertoys winget komorebi whkd oh-my-posh
+  scoop install starship neovim eza fd fzf ripgrep bat less gh delta openssh powershell powertoys winget komorebi whkd oh-my-posh
   # Yazi dependencies
   scoop install unar jq yq poppler zoxide yazi
   # This installation has file.exe, which will be used by yazi to display infomation about file
   winget install Git.Git
-  winget install Alacritty.Alacritty
+  winget install wez.wezterm Alacritty.Alacritty Ditto.Ditto Bitwarden.CLI
 
   scoop update *
 
