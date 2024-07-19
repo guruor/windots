@@ -11,6 +11,7 @@ alt + shift + o         : komorebic reload-configuration
 # App shortcuts - these require shell to be pwsh / powershell
 # The apps will be focused if open, or launched if not open
 alt + ctrl + shift + return : openterm -title "New Window"
+alt + ctrl + shift + space  :  Switch-Shell
 alt + ctrl + shift + o      : if ($wshell.AppActivate('Yazi') -eq $False) { openterm -title "Yazi" -cmdStr "cd ~; yazi" }
 alt + ctrl + shift + r      : if ($wshell.AppActivate('Bottom') -eq $False) { openterm -title "Bottom" -cmdStr "btm -b" }
 # alt + ctrl + shift + n      : if ($wshell.AppActivate('Notion') -eq $False) { start Notion }

@@ -7,6 +7,43 @@ if (-not $env:MY_FUNCTIONS_LOADED)
       Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
   }
 
+  function Show-NotificationToast
+  {
+    param(
+      [string]$BalloonTipTitle = "Notification",
+      [string]$BalloonTipText = "Default notification text.",
+      [int]$Duration = 3000
+    )
+
+    Add-Type -AssemblyName System.Windows.Forms
+
+    $NotifyIcon = New-Object System.Windows.Forms.NotifyIcon
+    $NotifyIcon.Icon = [System.Drawing.SystemIcons]::$Icon
+    $NotifyIcon.BalloonTipIcon = "Info"
+    $NotifyIcon.BalloonTipTitle = $BalloonTipTitle
+    $NotifyIcon.BalloonTipText = $BalloonTipText
+    $NotifyIcon.Visible = $true
+
+    $NotifyIcon.ShowBalloonTip($Duration)
+
+    Start-Sleep -Milliseconds $Duration
+
+    # Clean up the NotifyIcon object
+    $NotifyIcon.Dispose()
+  }
+
+  function Switch-Shell ()
+  {
+    if ($env:SHELL -eq 'bash')
+    {
+      $env:SHELL='pwsh'
+    } else
+    {
+      $env:SHELL='bash'
+    }
+    Show-NotificationToast -BalloonTipText "Switched the SHELL to $env:SHELL" -Duration 3000
+  }
+
   function openterm
   {
     [CmdletBinding()]
@@ -24,9 +61,10 @@ if (-not $env:MY_FUNCTIONS_LOADED)
     {
       if (-not $cmdStr)
       {
-         $cmdStr = "sleep 0.1; cd; zsh --login -i"
-      } else {
-        $cmdStr = "sleep 0.1; cd; zsh --login -ic '$cmdStr'"
+        $cmdStr = "cd; cd; zsh --login -i"
+      } else
+      {
+        $cmdStr = "cd; cd; zsh --login -ic '$cmdStr'"
       }
     }
 
@@ -34,7 +72,7 @@ if (-not $env:MY_FUNCTIONS_LOADED)
     {
       if (-not $cmdStr)
       {
-         $cmdStr = "$env:SHELL"
+        $cmdStr = "$env:SHELL"
       }
     }
 
