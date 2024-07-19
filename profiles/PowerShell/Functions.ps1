@@ -14,21 +14,15 @@ if (-not $env:MY_FUNCTIONS_LOADED)
       [string]$BalloonTipText = "Default notification text.",
       [int]$Duration = 3000
     )
-
-    Add-Type -AssemblyName System.Windows.Forms
-
+    [void] [System.Reflection.Assembly]::LoadWithPartialName("System.Windows.Forms")
     $NotifyIcon = New-Object System.Windows.Forms.NotifyIcon
-    $NotifyIcon.Icon = [System.Drawing.SystemIcons]::$Icon
+    $NotifyIcon.Icon = [System.Drawing.SystemIcons]::Information
     $NotifyIcon.BalloonTipIcon = "Info"
     $NotifyIcon.BalloonTipTitle = $BalloonTipTitle
     $NotifyIcon.BalloonTipText = $BalloonTipText
-    $NotifyIcon.Visible = $true
-
+    $NotifyIcon.Visible = $True
     $NotifyIcon.ShowBalloonTip($Duration)
-
     Start-Sleep -Milliseconds $Duration
-
-    # Clean up the NotifyIcon object
     $NotifyIcon.Dispose()
   }
 
