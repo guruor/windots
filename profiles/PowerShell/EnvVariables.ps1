@@ -5,7 +5,8 @@ if (-not $env:MY_ENV_VARS_LOADED)
   $env:MYVIMRCLSP = "$env:LOCALAPPDATA/nvim/lua/initlsp.lua"
   $env:EDITOR = "nvim"
   $env:MY_DOTFILES_DIR = "~/windots"
-  $env:SHELL = "pwsh"
+  # Use pwsh if not using WSL
+  $env:SHELL = "bash"
 
   Write-Host "✅ Loaded env variables successfully." -ForegroundColor Green
 } else
