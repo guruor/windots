@@ -12,12 +12,31 @@ if (-not $env:MY_FUNCTIONS_LOADED)
     [CmdletBinding()]
     param(
       [string]$title,
-      [string]$cmdStr = "$env:SHELL",
+      [string]$cmdStr,
       [string]$shell = "$env:SHELL",
       [string]$workingDirectory = "$env:USERPROFILE"
     )
 
     $terminal = "alacritty"
+
+    # Handling WSL commands
+    if ("$env:SHELL" -eq "bash")
+    {
+      if (-not $cmdStr)
+      {
+         $cmdStr = "sleep 0.1; cd; zsh --login -i"
+      } else {
+        $cmdStr = "sleep 0.1; cd; zsh --login -ic '$cmdStr'"
+      }
+    }
+
+    if ("$env:SHELL" -eq "pwsh")
+    {
+      if (-not $cmdStr)
+      {
+         $cmdStr = "$env:SHELL"
+      }
+    }
 
     # Check if specified terminal executable exists
     switch ($terminal)
