@@ -7,6 +7,22 @@ if (-not $env:MY_FUNCTIONS_LOADED)
       Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
   }
 
+  function Restart-WHKD
+  {
+    taskkill /f /im whkd.exe
+    # if shell is pwsh / powershell
+    Start-Process whkd -WindowStyle hidden
+    # if shell is cmd
+    #start /b whkd
+    Show-NotificationToast -BalloonTipText "Restarted WHKD" -Duration 1000
+  }
+
+  function Reload-Komorebi
+  {
+    komorebic reload-configuration
+    Show-NotificationToast -BalloonTipText "Restarted Komorebi" -Duration 1000
+  }
+
   function Show-NotificationToast
   {
     param(
