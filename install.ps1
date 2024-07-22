@@ -9,7 +9,7 @@ if ($confirmation -eq "Y" -or $confirmation -eq "y")
   # Build dev utils
   scoop install git curl wget make msys2 7zip gzip unzip gcc nodejs python go rustup-msvc luarocks
   # Handy tools
-  scoop install starship neovim eza fd fzf ripgrep bat less gh delta openssh powershell powertoys winget komorebi whkd oh-my-posh
+  scoop install starship neovim eza fd fzf ripgrep bat less gh delta openssh powershell powertoys winget komorebi whkd
   # Yazi dependencies
   scoop install unar jq yq poppler zoxide yazi
   # This installation has file.exe, which will be used by yazi to display infomation about file
@@ -27,8 +27,12 @@ if ($confirmation -eq "Y" -or $confirmation -eq "y")
   Update-Module
 
   # Install Font
-  # oh-my-posh font install FiraCode
-  oh-my-posh font install JetBrainsMono
+  $profilesRoot = Split-Path $Profile
+  . (Join-Path $profilesRoot "Install-fonts.ps1")
+  Install-Fonts -FontUrls @(
+    "https://github.com/subframe7536/maple-font/releases/download/v6.4/MapleMono-NF.zip",
+    "https://github.com/ryanoasis/nerd-fonts/releases/download/v3.2.1/JetBrainsMono.zip"
+  ) -DownloadDir "$env:TEMP\FontDownloads"
 
   # Install neovim helper
   pip install neovim
@@ -178,7 +182,6 @@ New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory
 
 # Symlinking ssh config
 $fileList = @(".ssh")
-Remove-Item "$env:USERPROFILE\.ssh" -Force -Recurse
 New-SelectiveSymlinks -SourceDirectory "$privateConfigSourcePath" -DestinationDirectory "$env:USERPROFILE" -FileList @($fileList)
 
 # Startup
