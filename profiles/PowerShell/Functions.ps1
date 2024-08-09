@@ -7,6 +7,36 @@ if (-not $env:MY_FUNCTIONS_LOADED)
       Select-Object -ExpandProperty Path -ErrorAction SilentlyContinue
   }
 
+  function Download-GithubRelease
+  {
+    param (
+      [string]$repo
+    )
+
+    # Fetch the latest release data from the GitHub API
+    $releaseData = curl -ks "https://api.github.com/repos/$repo/releases/latest" | ConvertFrom-Json
+
+    # Extract all download URLs with a .exe extension
+    $urls = $releaseData.assets | Where-Object { $_.browser_download_url -like "*.exe" } | Select-Object -ExpandProperty browser_download_url
+
+    # Use fzf to select the desired executable to download
+    $url = $urls | fzf --height 40% --border --header "Select the executable to download"
+
+    if ($url)
+    {
+      # Extract the filename from the URL
+      $filename = [System.IO.Path]::GetFileName($url)
+
+      # Download the selected executable
+      curl -kOL $url
+
+      Write-Host "Downloaded $filename"
+    } else
+    {
+      Write-Host "No executable selected."
+    }
+  }
+
   function Restart-WHKD
   {
     taskkill /f /im whkd.exe
