@@ -15,14 +15,12 @@ if (-not $env:MY_ENV_VARS_LOADED)
     $env:Path += ";$env:BINPATH"
   }
 
+  # This ideally should not happen but could happen when updating scoop
   if ($env:Path -notlike "*$($env:USERPROFILE)\scoop\shims*")
   {
     $env:Path += ";$env:USERPROFILE\scoop\shims"
-  }
-
-  if ($env:Path -notlike "*$($env:USERPROFILE)\scoop\apps\mpv\current*")
-  {
-    $env:Path += ";$env:USERPROFILE\scoop\apps\mpv\current"
+    # To fix the scoop path for binaries in $env:USERPROFILE\scoop\apps
+    scoop reset *
   }
 
   Write-Host "✅ Loaded env variables successfully." -ForegroundColor Green
