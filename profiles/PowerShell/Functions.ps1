@@ -108,20 +108,17 @@ if (-not $env:MY_FUNCTIONS_LOADED)
       }
     }
 
-    if ("$env:SHELL" -eq "pwsh")
-    {
-      if (-not $cmdStr)
-      {
-        $cmdStr = "$env:SHELL"
-      }
-    }
-
     # Check if specified terminal executable exists
     switch ($terminal)
     {
       "alacritty"
       {
-        Start-Process -FilePath alacritty -ArgumentList "--title ""$title"" --working-directory ""$workingDirectory"" -e ""$shell"" -c ""$cmdStr"""
+        $arguments = "--title ""$title"" --working-directory ""$workingDirectory"" -e ""$shell"""
+        if ($cmdStr) {
+            $arguments += " -c ""$cmdStr"""
+        }
+
+        Start-Process -FilePath $terminal -ArgumentList $arguments
       }
       default
       {
