@@ -9,9 +9,20 @@ if ($confirmation -eq "Y" -or $confirmation -eq "y")
   # Build dev utils
   scoop install git curl wget make msys2 7zip gzip unzip gcc nodejs python go rustup-msvc luarocks
   # Handy tools
-  scoop install starship neovim eza fd fzf ripgrep bat less gh delta openssh powershell powertoys winget komorebi whkd
+  scoop install starship neovim eza fd fzf ripgrep bat less gh delta openssh powertoys winget komorebi whkd
+  winget install --id Microsoft.Powershell
   # Yazi dependencies
   scoop install unar jq yq poppler zoxide yazi
+  # Music player
+  scoop bucket add extras
+  scoop install mpv yt-dlp ffmpeg
+  pip install git+https://github.com/mps-youtube/yewtube.git
+
+  # Installing kanata-tray
+  $env:BINPATH = "$env:USERPROFILE/.bin"
+  Download-GithubRelease -repo "rszyma/kanata-tray"
+  Move-Item kanata-tray.exe $env:BINPATH/kanata-tray.exe -Force
+
   # This installation has file.exe, which will be used by yazi to display infomation about file
   winget install Git.Git
   winget install wez.wezterm Alacritty.Alacritty Ditto.Ditto Bitwarden.CLI Espanso.Espanso
