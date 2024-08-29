@@ -14,6 +14,7 @@ alt + ctrl + shift + space  :  Switch-Shell
 alt + ctrl + shift + o      : if ($wshell.AppActivate('Yazi') -eq $False) { openterm -title "Yazi" -cmdStr "cd ~; yazi" }
 alt + ctrl + shift + r      : if ($wshell.AppActivate('Bottom') -eq $False) { openterm -title "Bottom" -cmdStr "btm -b" }
 # alt + ctrl + shift + n      : if ($wshell.AppActivate('Notion') -eq $False) { start Notion }
+alt + ctrl + shift + m      : if ($wshell.AppActivate('Music') -eq $False) { openterm -title "Music" -cmdStr "cd ~; yt" }
 alt + ctrl + shift + w      : if ($wshell.AppActivate('Brave') -eq $False) { start Brave }
 alt + ctrl + shift + oem_1  : if ($wshell.AppActivate('Code') -eq $False) { openterm -title "Code" -cmdStr "dot;c" } # oem_1 is ;
 
