@@ -183,7 +183,7 @@ $fileList = @("kanata", "git", "wezterm")
 New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory "$configDestinationPath" -FileList @($fileList)
 
 # Symlinking kanata-tray config
-$fileList = @("kanata-tray", "yazi", "bottom", "alacritty", "espanso")
+$fileList = @("kanata-tray", "yazi", "bottom", "alacritty", "espanso", "nushell")
 New-SelectiveSymlinks -SourceDirectory "$configSourcePath" -DestinationDirectory "$env:APPDATA" -FileList @($fileList)
 
 # Symlinking nvim config
