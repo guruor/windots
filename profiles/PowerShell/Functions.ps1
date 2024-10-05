@@ -72,15 +72,22 @@ if (-not $env:MY_FUNCTIONS_LOADED)
     $NotifyIcon.Dispose()
   }
 
-  function Switch-Shell ()
+  function Switch-Shell
   {
-    if ($env:SHELL -eq 'bash')
+    $shells = 'pwsh', 'bash', 'nu'
+    $currentShellIndex = $shells.IndexOf($env:SHELL)
+
+    # If the current shell is not found in the list, assume the first shell
+    if ($currentShellIndex -eq -1)
     {
-      $env:SHELL='pwsh'
-    } else
-    {
-      $env:SHELL='bash'
+      $currentShellIndex = 0
     }
+
+    # Calculate the index of the next shell in a circular fashion
+    $nextShellIndex = ($currentShellIndex + 1) % $shells.Count
+
+    # Set the new shell and show a notification
+    $env:SHELL = $shells[$nextShellIndex]
     Show-NotificationToast -BalloonTipText "Switched the SHELL to $env:SHELL" -Duration 3000
   }
 
@@ -114,8 +121,9 @@ if (-not $env:MY_FUNCTIONS_LOADED)
       "alacritty"
       {
         $arguments = "--title ""$title"" --working-directory ""$workingDirectory"" -e ""$shell"""
-        if ($cmdStr) {
-            $arguments += " -c ""$cmdStr"""
+        if ($cmdStr)
+        {
+          $arguments += " -c ""$cmdStr"""
         }
 
         Start-Process -FilePath $terminal -ArgumentList $arguments
