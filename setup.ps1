@@ -1,4 +1,7 @@
-Set-ExecutionPolicy RemoteSigned -Scope CurrentUser -Force
+# Only set the policy if it isn't already Bypass (to avoid redundant warnings)
+if ((Get-ExecutionPolicy -Scope Process) -ne 'Bypass') {
+    Set-ExecutionPolicy Bypass -Scope Process -Force -ErrorAction SilentlyContinue
+}
 
 # 1. Install Scoop
 if (-not (Get-Command scoop -ErrorAction SilentlyContinue)) {
@@ -23,10 +26,10 @@ $env:dotdir = "$HOME/windots"
 if (-not (Test-Path $env:dotdir)) {
     git clone --recurse-submodules -c core.symlinks=true https://github.com/guruor/windots "$env:dotdir"
 }
-Set-Location $env:dotdir
 
-# 6. Clean up old paths
-Remove-Item "dotfiles-open" -Force -Recurse -ErrorAction SilentlyContinue
-git clone --recurse-submodules -c core.symlinks=true https://github.com/guruor/dotfiles-open
+$env:opendotdir = "$HOME/dotfiles-open"
+if (-not (Test-Path $env:opendotdir)) {
+    git clone --recurse-submodules -c core.symlinks=true https://github.com/guruor/dotfiles-open "$env:opendotdir"
+}
 
 Write-Host "Step 1 Complete. PLEASE RESTART YOUR TERMINAL and run install.ps1" -ForegroundColor Green
