@@ -177,11 +177,36 @@ Write-Host "Linking all top-level configs to $configDest..." -ForegroundColor Cy
 New-Symlinks -SourcePath $configSource -DestinationPath $configDest
 
 # 3. PowerShell Profiles
-$pwshPath = Join-Path $HOME "Documents\PowerShell"
-# Points to the 'profiles' folder inside your dotfiles repo
-if (Test-Path "$dotDir\profiles\PowerShell") {
-    if (Test-Path $pwshPath) { Remove-Item $pwshPath -Force -Recurse -ErrorAction SilentlyContinue }
-    New-Item -ItemType SymbolicLink -Path $pwshPath -Target "$dotDir\profiles\PowerShell" -Force | Out-Null
+$pwshDestPath = Join-Path $HOME "Documents\PowerShell"
+$pwshSourcePath = Join-Path $dotDir "profiles\PowerShell"
+
+if (Test-Path $pwshSourcePath) {
+    Write-Host "Linking PowerShell profile files..." -ForegroundColor Cyan
+    
+    # 1. Ensure the destination folder is a REAL directory, not a symlink
+    if (Test-Path $pwshDestPath) {
+        $item = Get-Item $pwshDestPath
+        if ($item.Attributes -match "ReparsePoint") {
+            Remove-Item $pwshDestPath -Force -Recurse -ErrorAction SilentlyContinue
+        }
+    }
+    if (-not (Test-Path $pwshDestPath)) { 
+        New-Item -ItemType Directory -Path $pwshDestPath -Force | Out-Null 
+    }
+
+    # 2. Link specific files from the source to the destination
+    # This grabs Microsoft.PowerShell_profile.ps1, aliases.ps1, etc.
+    $profileFiles = Get-ChildItem -Path $pwshSourcePath -File
+    foreach ($file in $profileFiles) {
+        $destFile = Join-Path $pwshDestPath $file.Name
+        
+        if (Test-Path $destFile) { 
+            Remove-Item $destFile -Force -ErrorAction SilentlyContinue 
+        }
+
+        New-Item -ItemType SymbolicLink -Path $destFile -Target $file.FullName -Force | Out-Null
+        Write-Host "Linked Profile File: $($file.Name)" -ForegroundColor Gray
+    }
 }
 
 # 4. Windows Startup Folder
