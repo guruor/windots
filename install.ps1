@@ -42,31 +42,49 @@ function Install-GithubRelease {
 }
 
 function New-Symlinks {
-    param ([Parameter(Mandatory=$true)]$SourcePath, [Parameter(Mandatory=$true)]$DestinationPath, [string[]]$FileList = @())
+    param (
+        [Parameter(Mandatory=$true)][string]$SourcePath, 
+        [Parameter(Mandatory=$true)][string]$DestinationPath, 
+        [string[]]$FileList = @()
+    )
 
     if (-not (Test-Path $SourcePath)) { return }
 
+    # FIX: Remove -Recurse. Only look at top-level items.
     $items = if ($FileList.Count -gt 0) {
         $FileList | ForEach-Object { Get-Item (Join-Path $SourcePath $_) -ErrorAction SilentlyContinue }
     } else {
-        Get-ChildItem -Path $SourcePath -Recurse -File
+        Get-ChildItem -Path $SourcePath | Where-Object { $_.Attributes -notlike "*ReparsePoint*" }
     }
 
     foreach ($item in $items) {
-        $relativePath = if ($item.PSIsContainer) { $item.Name } else { $item.FullName.Substring($SourcePath.Length).TrimStart('\') }
-        $dest = Join-Path $DestinationPath $relativePath
-        $parent = Split-Path $dest
+        $sourceFullName = $item.FullName
+        $dest = Join-Path $DestinationPath $item.Name
         
-        if (-not (Test-Path $parent)) { New-Item -ItemType Directory $parent -Force | Out-Null }
-        if (Test-Path $dest) { Remove-Item $dest -Force -Recurse -ErrorAction SilentlyContinue }
+        # Safety Check: Never link a file to itself
+        if ($sourceFullName -eq $dest) { continue }
+
+        # Ensure Destination Parent exists
+        if (-not (Test-Path $DestinationPath)) { 
+            New-Item -ItemType Directory -Path $DestinationPath -Force | Out-Null 
+        }
+        
+        # Remove existing destination (file or folder symlink)
+        if (Test-Path $dest) { 
+            Remove-Item $dest -Force -Recurse -ErrorAction SilentlyContinue 
+        }
         
         try {
-            New-Item -ItemType SymbolicLink -Path $dest -Target $item.FullName -Force -ErrorAction Stop | Out-Null
-            Write-Host "Linked (Native): $relativePath" -ForegroundColor Gray
+            $type = if ($item.PSIsContainer) { "SymbolicLink" } else { "File" }
+            # For folders, we must specify the type explicitly for Windows
+            if ($item.PSIsContainer) {
+                cmd /c mklink /D "$dest" "$sourceFullName" | Out-Null
+            } else {
+                New-Item -ItemType SymbolicLink -Path $dest -Target $sourceFullName -Force -ErrorAction Stop | Out-Null
+            }
+            Write-Host "Linked: $($item.Name)" -ForegroundColor Gray
         } catch {
-            $flag = if ($item.PSIsContainer) { "/D" } else { "" }
-            cmd /c mklink $flag "$dest" "$($item.FullName)" | Out-Null
-            Write-Host "Linked (mklink): $relativePath" -ForegroundColor Gray
+            Write-Warning "Failed to link $($item.Name)"
         }
     }
 }
@@ -97,8 +115,7 @@ if ($confirmation -match "^[Yy]") {
     $wingetApps = @("Microsoft.Powershell", "Git.Git", "wez.wezterm", "Alacritty.Alacritty", "Ditto.Ditto", "Bitwarden.CLI", "Espanso.Espanso")
     foreach ($app in $wingetApps) {
         Write-Host "Checking $app..." -ForegroundColor Gray
-        # Only install if not already found
-        winget install --id $app --silent --no-upgrade -e
+        winget upgrade --id $app --silent --accept-source-agreements --accept-package-agreements -e
     }
 
     # --- Rust & Kanata ---
@@ -126,33 +143,51 @@ if ($confirmation -match "^[Yy]") {
         }
     }
 
+    # Dynamically find the Python Scripts path and add to current session PATH
+    $pythonScripts = python -c "import site; import os; print(os.path.join(site.USER_BASE, 'Scripts'))"
+    if ($env:PATH -notlike "*$pythonScripts*") {
+        $env:PATH += ";$pythonScripts"
+        # To make it permanent for future sessions:
+        [Environment]::SetEnvironmentVariable("Path", $env:PATH + ";$pythonScripts", "User")
+    }
+    Write-Host "Upgrading pip..." -ForegroundColor Cyan
+    python.exe -m pip install --upgrade pip --quiet
     # Python helpers (pip handles this internally)
-    pip install neovim git+https://github.com/mps-youtube/yewtube.git --quiet
+    pip install neovim git+https://github.com/mps-youtube/yewtube.git --quiet --no-warn-script-location
 
     # Refresh Environment
     $env:PATH = [System.Environment]::GetEnvironmentVariable("Path","Machine") + ";" + [System.Environment]::GetEnvironmentVariable("Path","User")
 }
 
 # --- 3. Symlinking Block ---
-Write-Warning "Starting with config symlinking."
+Write-Warning "Starting prioritized config symlinking."
+$dotDir = "$HOME/windots"
+$dotOpenDir = "$HOME/dotfiles-open"
+$configSource = Join-Path $dotOpenDir ".config"
 $configDest = Join-Path $HOME ".config"
-$dotOpen = Join-Path $PWD "dotfiles-open"
 
-New-Symlinks -SourcePath "$PWD\.config" -DestinationPath $configDest
-New-Symlinks -SourcePath "$dotOpen\.config" -DestinationPath $configDest -FileList @("kanata", "git", "wezterm")
-New-Symlinks -SourcePath "$dotOpen\.config" -DestinationPath $env:APPDATA -FileList @("kanata-tray", "yazi", "bottom", "alacritty", "espanso", "nushell")
-New-Symlinks -SourcePath "$dotOpen\.config" -DestinationPath $env:LOCALAPPDATA -FileList @("nvim")
-New-Symlinks -SourcePath "$dotOpen\Private\.config" -DestinationPath $HOME -FileList @(".ssh")
-New-Symlinks -SourcePath "$PWD\profiles" -DestinationPath "$HOME\Documents"
+# 1. Handle Special Windows Paths FIRST (AppData/Local)
+# This prevents these specific folders from being caught in the generic ~/.config link later
+New-Symlinks -SourcePath $configSource -DestinationPath $env:APPDATA -FileList @("kanata-tray", "yazi", "bottom", "alacritty", "espanso", "nushell", "scoop")
+New-Symlinks -SourcePath $configSource -DestinationPath $env:LOCALAPPDATA -FileList @("nvim")
 
-# Legacy PowerShell Profile Link
-$pwshPath = Join-Path $HOME "Documents\WindowsPowerShell"
-if (Test-Path "$PWD\profiles\PowerShell") {
+# 2. CATCH-ALL: Link every remaining TOP-LEVEL folder/file in .config
+# This will link ~/dotfiles-open/.config/git -> ~/.config/git (as a folder link)
+Write-Host "Linking all top-level configs to $configDest..." -ForegroundColor Cyan
+New-Symlinks -SourcePath $configSource -DestinationPath $configDest
+
+# 3. PowerShell Profiles
+$pwshPath = Join-Path $HOME "Documents\PowerShell"
+# Points to the 'profiles' folder inside your dotfiles repo
+if (Test-Path "$dotDir\profiles\PowerShell") {
     if (Test-Path $pwshPath) { Remove-Item $pwshPath -Force -Recurse -ErrorAction SilentlyContinue }
-    cmd /c mklink /D "$pwshPath" "$PWD\profiles\PowerShell"
+    New-Item -ItemType SymbolicLink -Path $pwshPath -Target "$dotDir\profiles\PowerShell" -Force | Out-Null
 }
 
-New-Symlinks -SourcePath "$PWD\startup" -DestinationPath "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+# 4. Windows Startup Folder
+if (Test-Path "$dotDir\startup") {
+    New-Symlinks -SourcePath "$dotDir\startup" -DestinationPath "$env:APPDATA\Microsoft\Windows\Start Menu\Programs\Startup"
+}
 
 # --- 4. Post-Install ---
 if (Get-Process -Name "kanata-tray" -ErrorAction SilentlyContinue) {
